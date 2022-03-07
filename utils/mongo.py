@@ -5,6 +5,7 @@ import hashlib
 
 class MongoDB:
     def __init__(self) -> None:
+        # MongoDB URL 일부러 안 가렸음
         self.client = MongoClient('mongodb://root:password@146.56.187.171:27010')
         self.db = self.client["hello-word"]
         self.users_collection = self.db["users"]
