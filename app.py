@@ -1,182 +1,114 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-from utils.mongo import MongoDB
-from datetime import datetime, timedelta
-from distutils.util import strtobool
-import jwt
 
-JWT_SECRET = "HangHae99Chapter1MiniProject"
+from models.auth import Auth
+from models.users import Users
+from models.words import Words
 
 app = Flask(__name__)
-mongo = MongoDB()
 
 
 @app.route('/')
 def home():
-    token = request.cookies.get("hello-token")
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        result = mongo.auth_user(payload)
-        if not result["ok"]:
-            return render_template("index.j2")
+    [signed, _, _] = Auth.check(request)
+
+    if signed:
         return redirect(url_for("my_words"))
-    except jwt.ExpiredSignatureError:
-        return render_template("index.j2", message="로그인 시간이 만료되었습니다.")
-    except jwt.exceptions.DecodeError:
-        return render_template("index.j2")
+
+    return render_template("index.html")
 
 
 @app.route('/mywords')
 def my_words():
-    token = request.cookies.get("hello-token")
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        result = mongo.auth_user(payload)
-        if not result["ok"]:
-            return redirect(url_for("home"))
-        return render_template("mywords.j2")
-    except jwt.ExpiredSignatureError:
-        return redirect(url_for("home", message="로그인 시간이 만료되었습니다."))
-    except jwt.exceptions.DecodeError:
-        return redirect(url_for("home", message="로그인 시간이 만료되었습니다."))
+    [signed, _, _] = Auth.check(request)
+
+    if not signed:
+        return redirect(url_for("home"))
+
+    return render_template("mywords.html")
 
 
-def check_auth(req) -> jsonify:
-    token = req.cookies.get('hello-token')
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        user = mongo.auth_user(payload)
+@app.route('/quiz')
+def quiz():
+    [signed, _, _] = Auth.check(request)
 
-        if not user:
-            return {
-                "ok": False,
-                "message": "사용자 정보를 찾을 수 없습니다."
-            }
-        return {
-            "ok": True
-        }
-    except jwt.ExpiredSignatureError:
-        return {
-            "ok": False,
-            "message": "로그인 기간이 만료되었습니다."
-        }
-    except jwt.exceptions.DecodeError:
-        return {
-            "ok": False,
-            "message": "로그인 정보가 존재하지 않습니다."
-        }
+    if not signed:
+        return redirect(url_for("home"))
+
+    return render_template("quiz.html")
 
 
-@app.route('/api/signup', methods=["POST"])
-def signup() -> jsonify:
-    data = request.form
-    result = mongo.insert_user(data)
+@app.route('/api/login', methods=['POST'])
+def login():
+    user_id = request.form['user_id']
+    user_passwd = request.form['user_passwd']
 
-    if not result["ok"]:
-        return jsonify({
-            "ok": False,
-            "message": result["message"]
-        })
-
-    return jsonify({
-        "ok": True
-    })
+    [signed, token, message] = Auth.sign(user_id, user_passwd)
+    return jsonify({"ok": signed, "token": token, "message": message})
 
 
-@app.route('/api/login', methods=["POST"])
-def login() -> jsonify:
-    data = request.form
-    result = mongo.sign_user(data)
+@app.route('/api/signup', methods=['POST'])
+def sign_up():
+    user_id = request.form['user_id']
+    user_name = request.form['user_name']
+    user_passwd = request.form['user_passwd']
 
-    if not result["ok"]:
-        return jsonify({
-            "ok": False,
-            "message": result["message"]
-        })
+    [success, message] = Users.create(user_id, user_name, user_passwd)
 
-    user = result["user"]
-    payload = {
-        "id": user["id"],
-        "exp": datetime.utcnow() + timedelta(days=1)
-    }
+    if not success:
+        return jsonify({"ok": False, "message": message})
 
-    token = jwt.encode(payload, JWT_SECRET, algorithm='HS256')
-    return jsonify({
-        "ok": True,
-        "token": token
-    })
+    [ok, message] = Words.dummy(user_id)
+    return jsonify({"ok": ok, "message": message})
 
 
 @app.route('/api/words', methods=["GET"])
-def get_words() -> jsonify:
-    auth = check_auth(request)
+def word_find():
+    [signed, user_id, _] = Auth.check(request)
 
-    if not auth['ok']:
-        return jsonify(auth)
+    if not signed:
+        return redirect(url_for("home"))
 
     query = request.args.to_dict()
+    [ok, words, message] = Words.find(user_id, query)
 
-    if 'done' in query.keys():
-        query["done"] = bool(strtobool(query["done"]))
-
-    if 'star' in query.keys():
-        query['star'] = bool(strtobool(query["star"]))
-
-    result = mongo.find_words(query)
-
-    return jsonify({
-        "ok": True,
-        "words": result
-    })
+    return jsonify({"ok": ok, "words": words, "message": message})
 
 
-@app.route('/api/word', methods=["PUT"])
-def update_word() -> jsonify:
-    auth = check_auth(request)
+@app.route('/api/words/new', methods=["POST"])
+def word_insert():
+    [signed, user_id, _] = Auth.check(request)
 
-    if not auth['ok']:
-        return jsonify(auth)
+    if not signed:
+        return redirect(url_for("home"))
 
-    _id = request.form.get("_id")
-    data = request.form.get("data")
+    doc = request.form
+    [ok, message] = Words.add(user_id, doc)
 
-    result = mongo.update_word(_id, data)
-
-    if not result["ok"]:
-        return {"ok": False, "message": result["message"]}
-
-    return {"ok": True}
+    return jsonify({"ok": ok, message: message})
 
 
-@app.route('/api/word', method=["POST"])
-def insert_words() -> jsonify:
-    auth = check_auth(request)
+@app.route('/api/words/<string:word_id>', methods=["PUT"])
+def word_modify(word_id):
+    [signed, user_id, _] = Auth.check(request)
 
-    if not auth['ok']:
-        return jsonify(auth)
+    if not signed:
+        return redirect(url_for("home"))
 
-    data = request.form
-    result = mongo.insert_word(data)
+    doc = request.form
+    [ok, message] = Words.update(user_id, word_id, doc)
 
-    if not result["ok"]:
-        return {"ok": False, "message": result["message"]}
-
-    return jsonify({"ok": True})
+    return jsonify({"ok": ok, message: message})
 
 
-@app.route('/api/word', method=["DELETE"])
-def delete_words() -> jsonify:
-    auth = check_auth(request)
+@app.route('/api/words/<string:word_id>', methods=["DELETE"])
+def word_delete(word_id):
+    [signed, user_id, _] = Auth.check(request)
 
-    if not auth['ok']:
-        return jsonify(auth)
+    if not signed:
+        return redirect(url_for("home"))
 
-    _id = request.form.get('_id')
-    result = mongo.delete_word(_id)
-
-    if not result["ok"]:
-        return {"ok": False, "message": result["message"]}
-
-    return jsonify({"ok": True})
+    [ok, message] = Words.delete(user_id, word_id)
+    return jsonify({"ok": ok, message: message})
 
 
 if __name__ == '__main__':
