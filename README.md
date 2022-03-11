@@ -2,41 +2,11 @@
 
 ## 1. Preview
 
-[![항해99(6기) d반 1조 Chapter #1 미니 프로젝트 시연 영상 - Hello words](thumbnail.png)](https://www.youtube.com/watch?v=aFoNL9F2swQ) 
+[![항해99(6기) d반 1조 Chapter #1 미니 프로젝트 시연 영상 - Hello words](images/thumbnail.png)](https://www.youtube.com/watch?v=aFoNL9F2swQ) 
 
 ## 2. Note
 
 <ul>
-  <li>
-    <details>
-      <summary>
-        <b>Tags</b>
-      </summary>
-      <div markdown="1">
-        <ul>
-          <a href="https://choewy.tistory.com/125"
-            ><li>S.A(Start Assignment)</li></a
-          >
-          <a href="https://github.com/fomula91/HelloWord/tree/v1.0.0-test"
-            ><li>v1.0.0-test</li></a
-          >
-          <a
-            href="https://github.com/fomula91/HelloWord/tree/v1.0.2-first-merge"
-            ><li>v1.0.2-first-merge</li></a
-          >
-          <a href="https://github.com/fomula91/HelloWord/tree/v1.0.3-complete"
-            ><li>v1.0.3-complete</li></a
-          >
-          <a href="https://github.com/fomula91/HelloWord/tree/v1.0.4-refectory"
-            ><li>v1.0.4-refectory</li></a
-          >
-          <a href="https://github.com/fomula91/HelloWord/tree/v1.0.5-final"
-            ><li>v1.0.5-final</li></a
-          >
-        </ul>
-      </div>
-    </details>
-  </li>
   <li>
     <details>
       <summary>
@@ -53,7 +23,21 @@
       </div>
     </details>
   </li>
+  <li>
+    <details>
+      <summary>
+        <b>Refrence</b>
+      </summary>
+      <div markdown="1">
+        <ul>
+          <a href="https://choewy.tistory.com/125"
+            ><li>S.A(Start Assignment)</li></a>
+        </ul>
+      </div>
+    </details>
+  </li>
 </ul>
+
 
 ## 3. Role
 
