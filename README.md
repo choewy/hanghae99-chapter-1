@@ -163,7 +163,7 @@ KEY = ${Secret Key}
         <li>커스텀 Alert 적용</li>
         <li>최종 검토</li>
         <li>시연 영상 촬영 및 편집</li>
-        <li>이슈 사항 정리 및 회고</li>
+        <li>코드 리뷰, MVC 구조 설명</li>
       </ul>
     </div>
   </details>
