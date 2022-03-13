@@ -59,8 +59,8 @@ KEY = ${Secret Key}
       <div markdown="1">
         <ul>
           <li>단어 조회 페이지 구현</li>
-          <li>전체 기능 검토 및 통합</li>
-          <li>Repo 관리, 리팩토링</li>
+          <li>전체 기능 및 코드 검토, 기능 통합</li>
+          <li>Repository 관리 및 MVC 패턴 적용</li>
         </ul>
       </div>
     </details>
