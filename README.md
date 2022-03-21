@@ -2,7 +2,9 @@
 
 ## 1. Preview
 
-[![항해99(6기) d반 1조 Chapter #1 미니 프로젝트 시연 영상 - Hello words](images/thumbnail.png)](https://www.youtube.com/watch?v=aFoNL9F2swQ) 
+[![항해99(6기) d반 1조 Chapter #1 미니 프로젝트 시연 영상 - Hello words](images/thumbnail.png)](https://www.youtube.com/watch?v=aFoNL9F2swQ)
+
+<iframe src="https://www.youtube.com/embed/aFoNL9F2swQ" width="860" height="484" frameborder="0" allowfullscreen="true"></iframe>
 
 ## 2. Note
 
